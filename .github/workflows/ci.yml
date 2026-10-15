@@ -1,0 +1,45 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information regarding
+# copyright ownership.  The ASF licenses this file to You under the
+# Apache License, Version 2.0 (the "License"); you may not use this
+# file except in compliance with the License.  You may obtain a copy
+# of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  train:
+    name: Tiny-model training smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Install dependencies
+        run: uv sync --group validate
+      - name: Train (tiny smoke settings)
+        run: uv run python src/train.py --epochs 1 --chars 20000
+      - name: Validate records against the spec
+        env:
+          # TODO: pin to the spec release once PR #10 (TrainingProvenanceRecord)
+          # is merged and published; until then CI validates offline only.
+          SOURCELUME_SPEC: ''
+        run: |
+          if [ -n "$SOURCELUME_SPEC" ]; then
+            uv run python scripts/validate-records.py
+          else
+            echo "record validation skipped: no spec checkout available in CI yet"
+          fi
