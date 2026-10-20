@@ -18,8 +18,8 @@
 SHACL), reusing the spec's own validator.
 
 SOURCELUME_SPEC must point at a sourcelume-spec checkout that includes the
-TrainingProvenanceRecord type — i.e. the model-usage-record branch (PR #10)
-until it is merged into main. Defaults to the local worktree of that branch.
+TrainingProvenanceRecord type (spec main since PR #10). There is no default:
+point it at your local checkout, e.g. SOURCELUME_SPEC=../sourcelume-spec.
 """
 
 import json
@@ -28,7 +28,14 @@ import sys
 from pathlib import Path
 
 BASE = Path(__file__).resolve().parent.parent
-SPEC = Path(os.environ.get("SOURCELUME_SPEC", "/private/tmp/wt-model")).resolve()
+spec_env = os.environ.get("SOURCELUME_SPEC", "")
+if not spec_env:
+    print(
+        "SOURCELUME_SPEC must point at a sourcelume-spec checkout (e.g. ../sourcelume-spec)",
+        file=sys.stderr,
+    )
+    sys.exit(2)
+SPEC = Path(spec_env).resolve()
 if not (SPEC / "tools" / "validate.py").is_file():
     print(f"SOURCELUME_SPEC is not a spec checkout: {SPEC}", file=sys.stderr)
     sys.exit(2)

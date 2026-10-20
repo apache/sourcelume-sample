@@ -28,7 +28,7 @@
   "created": "2026-10-15T00:00:00Z",
   "added": "2026-10-15T00:00:00Z",
   "contentCreated": "1865-11-26T00:00:00Z",
-  "origin": "Plain text of Lewis Carroll's 'Alice's Adventures in Wonderland' (first published 26 November 1865), fetched verbatim from Project Gutenberg (ebook #11, https://www.gutenberg.org/ebooks/11) in October 2026 and bundled unchanged at data/corpus/alice-in-wonderland-1865.txt as demo training data. The work is in the public domain worldwide (published 1865, author died 1898); the Project Gutenberg framing text included in the file is distributed under the Project Gutenberg License (www.gutenberg.org). This record is authored and published by the Sourcelume training demo itself: the demo bootstraps its own registry preconditions instead of assuming records it did not create. Form: verbatim.",
+  "origin": "Plain text of Lewis Carroll's 'Alice's Adventures in Wonderland' (first published 26 November 1865), fetched verbatim from Project Gutenberg (ebook #11, https://www.gutenberg.org/ebooks/11) in October 2026 and bundled unchanged at data/corpus/alice-in-wonderland-1865.txt as demo training data. The work is in the public domain worldwide (published 1865, author died 1898); the Project Gutenberg framing text included in the file is distributed under the Project Gutenberg License (www.gutenberg.org). This record is authored and published by the Sourcelume sample itself: the sample bootstraps its own registry preconditions instead of assuming records it did not create. Form: verbatim.",
   "custodyChain": [
     {
       "agent": "https://www.gutenberg.org/",
