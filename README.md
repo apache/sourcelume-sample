@@ -66,17 +66,17 @@ make demo
 | Dataset record: publish to Atlas | ✅ works with the Atlas stack up |
 | Training record: spec validation | ✅ works — validate against a `sourcelume-spec` checkout at `main` (the `TrainingProvenanceRecord` type was merged with PR #10); set `SOURCELUME_SPEC` accordingly |
 | Training record: plugin validate/publish | ❌ **expected to fail** — the Python plugin itself only models `ProvenanceRecord` (its Pydantic model rejects the record client-side). The plugin needs the same type-dispatch the spec validator has (tooling follow-up; see `make registry-validate`). |
-| Training record: registry validate/publish | ❌ **expected to fail** until the registry learns the `TrainingProvenanceRecord` type (registry follow-up to PR #10, currently in review as sourcelume-registry#15). Direct `curl -X POST .../records/validate` shows the registry's own rejection (HTTP 422, `must be the constant value 'ProvenanceRecord'`) — the demo's exhibit for that follow-up. |
+| Training record: registry validate/publish | ✅ works — the registry validates it (`POST /records/validate` → `{"conforms": true}`) and accepts it (201, `VALIDATED`, stored as `sourcelume_model`) since sourcelume-registry#15. Via the Python plugin the step is still blocked client-side (see the row above). Direct call: `curl -X POST -H 'Content-Type: application/json' --data-binary @model/provenance-record.json .../records/validate`. |
 
-This demo **builds on PR #10 as given**: the training record type, the
-type-dispatching validator and the record examples come from that branch.
+This sample **builds on spec PR #10 as merged**: the training record type, the
+type-dispatching validator and the record examples come from the spec's `main`.
 
 ## Honesty notes
 
-- The demo record is **unsigned** (Sourcelume Attest is still a discussion).
+- The sample record is **unsigned** (Sourcelume Attest is still a discussion).
 - It is a **producer's own claim** — no certification, no adjudication, no
   "approved" flag anywhere.
-- `disclosure: complete` is only honest because the demo *knows* its data.
+- `disclosure: complete` is only honest because the sample *knows* its data.
   Realistic partial/undisclosed cases are covered by the spec examples.
 - One token = one character (char-level model); `tokens` are per epoch,
   following the Mímir Table-10 convention.
