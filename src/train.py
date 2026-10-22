@@ -140,12 +140,12 @@ def main() -> int:
         "id": MODEL_ID,
         "type": "TrainingProvenanceRecord",
         "identifier": "tiny-lm",
-        "name": "Tiny char-LM (Apache Sourcelume training demo)",
+        "name": "Tiny char-LM (Apache Sourcelume sample)",
         "version": "v1",
         "creator": [
             {
                 "type": "schema:Organization",
-                "name": "Apache Sourcelume training demo",
+                "name": "Apache Sourcelume sample",
                 "role": "originator"
             }
         ],
@@ -167,7 +167,7 @@ def main() -> int:
             f"{tokens_per_epoch}-character slice of the referenced corpus "
             f"({len(vocab)}-character vocabulary, {params} parameters, "
             f"final loss {history[-1]:.4f}, see model/training-run.json). "
-            f"The referenced dataset record is published by this demo itself "
+            f"The referenced dataset record is published by this sample itself "
             f"(data/provenance-record.json). Unsigned producer claim — see README."
         ),
     }

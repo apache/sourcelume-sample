@@ -27,6 +27,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Check out the spec for record validation
+        uses: actions/checkout@v4
+        with:
+          repository: apache/sourcelume-spec
+          path: sourcelume-spec
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -38,12 +43,7 @@ jobs:
         run: uv run python src/train.py --epochs 1 --chars 20000
       - name: Validate records against the spec
         env:
-          # TODO: pin to the spec release once PR #10 (TrainingProvenanceRecord)
-          # is merged and published; until then CI validates offline only.
-          SOURCELUME_SPEC: ''
-        run: |
-          if [ -n "$SOURCELUME_SPEC" ]; then
-            uv run python scripts/validate-records.py
-          else
-            echo "record validation skipped: no spec checkout available in CI yet"
-          fi
+          # Unpinned main for now: the spec has no published release yet, and
+          # validating against the current spec is the point of this check.
+          SOURCELUME_SPEC: ${{ github.workspace }}/sourcelume-spec
+        run: uv run python scripts/validate-records.py

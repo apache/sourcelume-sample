@@ -64,9 +64,9 @@ make demo
 |---|---|
 | Dataset record: spec + registry validation | ✅ works today |
 | Dataset record: publish to Atlas | ✅ works with the Atlas stack up |
-| Training record: spec validation | ✅ works — **requires a spec checkout at the `model-usage-record` (PR #10) state or later**; set `SOURCELUME_SPEC` accordingly |
+| Training record: spec validation | ✅ works — validate against a `sourcelume-spec` checkout at `main` (the `TrainingProvenanceRecord` type was merged with PR #10); set `SOURCELUME_SPEC` accordingly |
 | Training record: plugin validate/publish | ❌ **expected to fail** — the Python plugin itself only models `ProvenanceRecord` (its Pydantic model rejects the record client-side). The plugin needs the same type-dispatch the spec validator has (tooling follow-up; see `make registry-validate`). |
-| Training record: registry validate/publish | ❌ **expected to fail** until the registry learns the `TrainingProvenanceRecord` type (registry follow-up to PR #10). Direct `curl -X POST .../records/validate` shows the registry's own rejection (HTTP 422, `must be the constant value 'ProvenanceRecord'`) — the demo's exhibit for that follow-up. |
+| Training record: registry validate/publish | ❌ **expected to fail** until the registry learns the `TrainingProvenanceRecord` type (registry follow-up to PR #10, currently in review as sourcelume-registry#15). Direct `curl -X POST .../records/validate` shows the registry's own rejection (HTTP 422, `must be the constant value 'ProvenanceRecord'`) — the demo's exhibit for that follow-up. |
 
 This demo **builds on PR #10 as given**: the training record type, the
 type-dispatching validator and the record examples come from that branch.
