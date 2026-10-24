@@ -49,7 +49,21 @@ make demo
 4. **Validate** — both records are validated twice: against the spec (JSON
    Schema + SHACL) and against the registry's `/records/validate` endpoint.
 5. **Publish + query** — with the Atlas stack up, records are published via
-   the Python plugin; `GET /records/{id}` and the Atlas UI show the result.
+   the Python plugin; `make query` asks `GET /records/{id}` for both records.
+   The model record's answer lists each `trainingData` entry together with the
+   referenced dataset record's **current** status, looked up at read time
+   (sourcelume-registry#22) — the registry answers "which datasets, in which
+   state", instead of leaving the reader to resolve the references by hand:
+
+   ```json
+   "trainingData": [
+     { "dataset": "https://sourcelume.apache.org/records/sample/gutenberg-alice-1865",
+       "phase": "pretraining", "tokens": 20000, "share": 1.0, "recordStatus": "VALIDATED" }
+   ]
+   ```
+
+   Nothing about the referenced records is stored on the model entity: a
+   dataset published or corrected later shows up on the next read.
 
 ## Prerequisites
 
@@ -66,6 +80,7 @@ make demo
 | Dataset record: publish to Atlas | ✅ works with the Atlas stack up |
 | Training record: spec validation | ✅ works — validate against a `sourcelume-spec` checkout at `main` (the `TrainingProvenanceRecord` type was merged with PR #10); set `SOURCELUME_SPEC` accordingly |
 | Training record: plugin validate/publish | ❌ **expected to fail** — the Python plugin itself only models `ProvenanceRecord` (its Pydantic model rejects the record client-side). The plugin needs the same type-dispatch the spec validator has (tooling follow-up; see `make registry-validate`). |
+| Training record: query resolves its datasets | ✅ works — `GET /records/{id}` lists each `trainingData` entry with the referenced dataset record's current status, looked up at read time (sourcelume-registry#22); nothing is stored on the model entity |
 | Training record: registry validate/publish | ✅ works — the registry validates it (`POST /records/validate` → `{"conforms": true}`) and accepts it (201, `VALIDATED`, stored as `sourcelume_model`) since sourcelume-registry#15. Via the Python plugin the step is still blocked client-side (see the row above). Direct call: `curl -X POST -H 'Content-Type: application/json' --data-binary @model/provenance-record.json .../records/validate`. |
 
 This sample **builds on spec PR #10 as merged**: the training record type, the
