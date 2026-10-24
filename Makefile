@@ -73,6 +73,13 @@ publish:
 query:
 	@echo "--- GET /records/{id} (dataset record; id = URL-encoded record IRI) ---"
 	@curl -sf "$(REGISTRY)/records/$$(python3 -c 'import urllib.parse; print(urllib.parse.quote("https://sourcelume.apache.org/records/sample/gutenberg-alice-1865", safe=""))' 2>/dev/null || echo 'https%3A%2F%2Fsourcelume.apache.org%2Frecords%2Fsample%2Fgutenberg-alice-1865')"; echo
+	@echo
+	@echo "--- GET /records/{id} (model record; the registry resolves each trainingData"
+	@echo "    reference to the dataset record's CURRENT status at read time) ---"
+	@curl -sf "$(REGISTRY)/records/$$(python3 -c 'import urllib.parse; print(urllib.parse.quote("https://sourcelume.apache.org/records/sample/tiny-lm-v1", safe=""))' 2>/dev/null || echo 'https%3A%2F%2Fsourcelume.apache.org%2Frecords%2Fsample%2Ftiny-lm-v1')" \
+		|| { echo ">>> no model record under that id yet: the Python plugin cannot publish"; \
+		echo "    TrainingProvenanceRecord client-side (see the README table). Publish it directly:"; \
+		echo "    curl -X POST -H 'Content-Type: application/json' --data-binary @model/provenance-record.json $(REGISTRY)/records"; }
 
 # Full demo, stage 1: everything that works without Atlas.
 demo: setup train validate-records registry-up registry-validate
@@ -81,7 +88,7 @@ demo: setup train validate-records registry-up registry-validate
 	@echo "(sourcelume-registry/dev-support) and then: make demo-atlas"
 
 # Full demo, stage 2: with Atlas, publishes everything it can.
-demo-atlas: setup train validate-records registry-up registry-validate publish
+demo-atlas: setup train validate-records registry-up registry-validate publish query
 	@echo
 	@echo "Stage 2 complete. Browse the Atlas UI at http://localhost:21000"
 	@echo "(admin / atlasR0cks!), search type sourcelume_dataset."
