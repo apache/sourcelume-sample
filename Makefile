@@ -51,15 +51,15 @@ registry-down:
 	@pkill -f quarkus-run.jar 2>/dev/null || true; echo "registry down"
 
 # Validate both records against the running registry.
-# The model record is EXPECTED to fail here until the registry learns the
-# TrainingProvenanceRecord type (registry follow-up to PR #10) — that failure
-# is the demo's "why registry Phase 2" exhibit.
+# The registry knows TrainingProvenanceRecord since sourcelume-registry#15,
+# but the model record still fails here: the Python plugin models only
+# ProvenanceRecord and rejects it client-side (tooling follow-up).
 registry-validate:
 	@echo "--- dataset record (ProvenanceRecord) ---"
 	uv run --project $(PLUGIN_DIR) sourcelume validate data -u $(REGISTRY)
 	@echo "--- model record (TrainingProvenanceRecord) ---"
 	@uv run --project $(PLUGIN_DIR) sourcelume validate model -u $(REGISTRY) \
-		|| echo ">>> expected failure until the registry knows TrainingProvenanceRecord"
+		|| echo ">>> expected failure: the Python plugin does not model TrainingProvenanceRecord yet (tooling follow-up)"
 
 # Publish both records. Requires the Atlas stack (sourcelume-registry
 # dev-support) — see make demo-atlas.
@@ -68,7 +68,7 @@ publish:
 	uv run --project $(PLUGIN_DIR) sourcelume publish data -u $(REGISTRY)
 	@echo "--- publishing model record ---"
 	@uv run --project $(PLUGIN_DIR) sourcelume publish model -u $(REGISTRY) \
-		|| echo ">>> expected failure until the registry knows TrainingProvenanceRecord"
+		|| echo ">>> expected failure: the Python plugin does not model TrainingProvenanceRecord yet (tooling follow-up)"
 
 query:
 	@echo "--- GET /records/{id} (dataset record; id = URL-encoded record IRI) ---"
