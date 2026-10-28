@@ -79,7 +79,7 @@ make demo
 | Dataset record: spec + registry validation | ✅ works today |
 | Dataset record: publish to Atlas | ✅ works with the Atlas stack up |
 | Training record: spec validation | ✅ works — validate against a `sourcelume-spec` checkout at `main` (the `TrainingProvenanceRecord` type was merged with PR #10); set `SOURCELUME_SPEC` accordingly |
-| Training record: plugin validate/publish | ✅ works with the plugin from `sourcelume-tooling` branch `COC-spike` at or after sourcelume-tooling#1: the plugin forwards a record that is not a `ProvenanceRecord` as it is, and the registry judges it. Earlier plugin versions reject the record client-side. |
+| Training record: plugin validate/publish | ✅ works with the plugin from `sourcelume-tooling` `main` (the pass-through came with sourcelume-tooling#1 and has been on `main` since sourcelume-tooling#3): the plugin forwards a record that is not a `ProvenanceRecord` as it is, and the registry judges it. Earlier plugin versions reject the record client-side. |
 | Training record: query resolves its datasets | ✅ works — `GET /records/{id}` lists each `trainingData` entry with the referenced dataset record's current status, looked up at read time (sourcelume-registry#22); nothing is stored on the model entity |
 | Training record: registry validate/publish | ✅ works — the registry validates it (`POST /records/validate` → `{"conforms": true}`) and accepts it (201, `VALIDATED`, stored as `sourcelume_model`) since sourcelume-registry#15. Direct call: `curl -X POST -H 'Content-Type: application/json' --data-binary @model/provenance-record.json .../records/validate`. |
 
