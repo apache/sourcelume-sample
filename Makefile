@@ -18,7 +18,7 @@ SHELL := /bin/bash
 # Local configuration (override on the command line as needed)
 PLUGIN_DIR     ?= ../sourcelume-tooling/plugins/sourcelume-python-plugin
 SOURCELUME_SPEC ?= /private/tmp/wt-model
-REGISTRY_DIR   ?= ../sourcelume-registry/sourcelume-registry-runtime-quarkus
+REGISTRY_DIR   ?= ../sourcelume-registry/sourcelume-registry-distribution-atlas
 REGISTRY       ?= http://localhost:8082
 REGISTRY_LOG   ?= /tmp/e2e-registry.log
 
