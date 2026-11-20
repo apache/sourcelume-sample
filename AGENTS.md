@@ -38,7 +38,9 @@ This repo is pure Python (`uv`); there is no Maven build here.
   scripts/validate-records.py` — validate both records against the
   spec's JSON Schema and SHACL shapes. This is the real gate.
 - `make demo` — the five-step local story (train, records, validation).
-  `make demo-atlas` adds the optional registry/Atlas round-trip.
+  `make demo-postgres` adds the registry round-trip on the default
+  PostgreSQL distribution (Docker only); `make demo-atlas` adds it on the
+  Atlas stack.
 
 Run the trainer and record validation before opening or updating a PR.
 A green `validate-records.py` is the local bar.
