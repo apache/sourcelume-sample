@@ -48,8 +48,10 @@ make demo
    actual run.
 4. **Validate** — both records are validated twice: against the spec (JSON
    Schema + SHACL) and against the registry's `/records/validate` endpoint.
-5. **Publish + query** — with the Atlas stack up, records are published via
+5. **Publish + query** — with a registry up, records are published via
    the Python plugin; `make query` asks `GET /records/{id}` for both records.
+   `make demo-postgres` runs the full loop on the default PostgreSQL
+   distribution (Docker only); `make demo-atlas` runs it on the Atlas stack.
    The model record's answer lists each `trainingData` entry together with the
    referenced dataset record's **current** status, looked up at read time
    (sourcelume-registry#22) — the registry answers "which datasets, in which
@@ -68,16 +70,17 @@ make demo
 ## Prerequisites
 
 - Python 3.11+ and [uv](https://docs.astral.sh/uv/)
-- For the registry steps: a local Sourcelume Registry
-  (see `sourcelume-registry/dev-support`, port 8082)
-- For publishing: the Atlas stack (`make demo-atlas`)
+- For the registry steps: a built `sourcelume-registry` checkout next to this
+  repo (the distribution jar under `target/quarkus-app/`, port 8082)
+- For publishing: Docker (`make demo-postgres` uses the default PostgreSQL
+  distribution) or the Atlas stack (`make demo-atlas`)
 
 ## What works today, and what deliberately does not
 
 | Step | State |
 |---|---|
 | Dataset record: spec + registry validation | ✅ works today |
-| Dataset record: publish to Atlas | ✅ works with the Atlas stack up |
+| Dataset record: publish | ✅ works on the PostgreSQL distribution (`make demo-postgres`, Docker only) and on the Atlas stack (`make demo-atlas`) |
 | Training record: spec validation | ✅ works — validate against a `sourcelume-spec` checkout at `main` (the `TrainingProvenanceRecord` type was merged with PR #10); set `SOURCELUME_SPEC` accordingly |
 | Training record: plugin validate/publish | ✅ works with the plugin from `sourcelume-tooling` `main` (the pass-through came with sourcelume-tooling#1 and has been on `main` since sourcelume-tooling#3): the plugin forwards a record that is not a `ProvenanceRecord` as it is, and the registry judges it. Earlier plugin versions reject the record client-side. |
 | Training record: query resolves its datasets | ✅ works — `GET /records/{id}` lists each `trainingData` entry with the referenced dataset record's current status, looked up at read time (sourcelume-registry#22); nothing is stored on the model entity |

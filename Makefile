@@ -19,11 +19,13 @@ SHELL := /bin/bash
 PLUGIN_DIR     ?= ../sourcelume-tooling/plugins/sourcelume-python-plugin
 SOURCELUME_SPEC ?= /private/tmp/wt-model
 REGISTRY_DIR   ?= ../sourcelume-registry/sourcelume-registry-distribution-atlas
+REGISTRY_PG_DIR ?= ../sourcelume-registry/sourcelume-registry-distribution-postgres
+REGISTRY_PG_DB ?= ../sourcelume-registry/dev-support/docker-compose.postgres.yml
 REGISTRY       ?= http://localhost:8082
 REGISTRY_LOG   ?= /tmp/e2e-registry.log
 
-.PHONY: setup train validate-records registry-up registry-down registry-validate \
-        demo demo-atlas query clean
+.PHONY: setup train validate-records registry-up registry-up-postgres registry-down \
+        registry-validate demo demo-postgres demo-atlas query clean
 
 setup:
 	uv sync --group validate
@@ -47,8 +49,24 @@ registry-up:
 		sleep 2; \
 	done; echo "registry did not come up (log: $(REGISTRY_LOG))"; exit 1
 
+# Start the default PostgreSQL distribution: the dev-support PostgreSQL
+# container plus the sourcelume-registry-distribution-postgres jar.
+registry-up-postgres:
+	@docker compose -f $(REGISTRY_PG_DB) up -d --wait
+	@( cd $(REGISTRY_PG_DIR) && \
+	   SOURCELUME_POSTGRES_JDBC_URL=jdbc:postgresql://localhost:55432/sourcelume_registry \
+	   SOURCELUME_POSTGRES_USERNAME=sourcelume \
+	   SOURCELUME_POSTGRES_PASSWORD=sourcelume \
+	   JENV_VERSION=21 nohup java -jar target/quarkus-app/quarkus-run.jar </dev/null >$(REGISTRY_LOG) 2>&1 & disown )
+	@for i in $$(seq 1 60); do \
+		curl -sf $(REGISTRY)/q/health/live >/dev/null 2>&1 && echo "registry up ($(REGISTRY))" && exit 0; \
+		sleep 2; \
+	done; echo "registry did not come up (log: $(REGISTRY_LOG))"; exit 1
+
 registry-down:
-	@pkill -f quarkus-run.jar 2>/dev/null || true; echo "registry down"
+	@pkill -f quarkus-run.jar 2>/dev/null || true
+	@docker compose -f $(REGISTRY_PG_DB) down >/dev/null 2>&1 || true
+	@echo "registry down"
 
 # Validate both records against the running registry.
 registry-validate:
@@ -57,8 +75,9 @@ registry-validate:
 	@echo "--- model record (TrainingProvenanceRecord) ---"
 	uv run --project $(PLUGIN_DIR) sourcelume validate model -u $(REGISTRY)
 
-# Publish both records. Requires the Atlas stack (sourcelume-registry
-# dev-support) — see make demo-atlas.
+# Publish both records. Requires a storage backend: the dev-support
+# PostgreSQL instance (make demo-postgres) or the Atlas stack
+# (make demo-atlas).
 publish:
 	@echo "--- publishing dataset record ---"
 	uv run --project $(PLUGIN_DIR) sourcelume publish data -u $(REGISTRY)
@@ -74,11 +93,19 @@ query:
 	@curl -sf "$(REGISTRY)/records/$$(python3 -c 'import urllib.parse; print(urllib.parse.quote("https://sourcelume.apache.org/records/sample/tiny-lm-v1", safe=""))' 2>/dev/null || echo 'https%3A%2F%2Fsourcelume.apache.org%2Frecords%2Fsample%2Ftiny-lm-v1')" \
 		|| echo ">>> no model record under that id yet: run make publish first"
 
-# Full demo, stage 1: everything that works without Atlas.
+# Full demo, stage 1: everything that works without a storage backend.
 demo: setup train validate-records registry-up registry-validate
 	@echo
-	@echo "Stage 1 complete. For the full publish loop run the Atlas stack"
-	@echo "(sourcelume-registry/dev-support) and then: make demo-atlas"
+	@echo "Stage 1 complete. For the full publish loop run make demo-postgres"
+	@echo "(default PostgreSQL distribution, Docker only) or make demo-atlas"
+	@echo "(Atlas stack via sourcelume-registry/dev-support)."
+
+# Full demo on the default backend: the PostgreSQL distribution — Docker only,
+# no Atlas stack.
+demo-postgres: setup train validate-records registry-up-postgres registry-validate publish query
+	@echo
+	@echo "Demo complete on the PostgreSQL distribution. Browse the records with"
+	@echo "make query, then make registry-down."
 
 # Full demo, stage 2: with Atlas, publishes everything it can.
 demo-atlas: setup train validate-records registry-up registry-validate publish query
